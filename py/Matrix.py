@@ -22,7 +22,7 @@ class Matrix(list):
         self.add_row(j,i)
         self.add_row(i,j)
 
-    def reduce(self):
+    def reduce(self): # original persistence algorithm
         for k1 in range(len(self)):
             check = False
             while not check:
@@ -47,7 +47,7 @@ class PersistenceMatrix:
         self.inc.append(col)
         self.red.append(SortedList([len(self)-1]))
 
-    def reduce(self):
+    def reduce(self): # persistence algorithm that updates the reducing matrix and diagram
         for k1 in range(len(self)):
             if k1 and self.inc[k1-1]:
                 self.dgm[max(self.inc[k1-1])] = k1-1
@@ -60,7 +60,7 @@ class PersistenceMatrix:
                         self.inc.add_col(k2,k1)
                         self.red.add_col(k2,k1)
                         check = False
-        for x in range(len(self)):
+        for x in range(len(self)): # arguably I don't need this
             if not self.inc[x] and x not in self.dgm:
                 self.dgm[x] = "inf"
 
