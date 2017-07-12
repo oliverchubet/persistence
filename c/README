@@ -1,0 +1,94 @@
+To use c functions from python:
+
+Run make (creates a shared object), then from python:
+
+	>>> from ctypes import cdll
+	>>> md = cdll.LoadLibrary('/path/to/libtest.so')
+	>>> md
+	>>> from structs import *
+
+Then you can call any library function with md.foo, using MATRIX for matrix structs, PERSISTENCE for persistence structs, and pointer() for pointers
+
+An example of how to run the vineyard algorithm:
+
+	Initialize structs:
+
+	>>> inc = MATRIX()
+	>>> red = MATRIX()
+	>>> p = PERSISTENCE(inc,red)
+
+	Insert simplices into the incidence matrix (using a bit vector representation of simplices, a 1 representing that index being a boundary simplex, and a value of 0 representing a vertex):
+
+	>>> p.insert_simplex(0b0)
+	>>> p.insert_simplex(0b0)
+	>>> p.insert_simplex(0b0)
+	>>> p.insert_simplex(0b11)
+	
+	... etc ...
+	
+	You can print your matrices at any point if you are so inclined:
+	(It will print the incidence matrix followed by the reducing matrix.)
+
+	>>> p.print()
+
+	If you want to only print one of the two matrices:
+
+	>>> p.inc.contents.print()
+
+	OR
+
+	>>> p.red.contents.print()
+
+	If you happened to mess up inputing one of your simplices, you can set it:
+	(Give the column you want to change and the value.)
+
+	>>> p.set_simplex(4,0b1111)
+
+	To reduce (use persistence algorithm):
+
+	>>> p.reduce()
+
+	To run the vineyard algorithm, give the first of the two indices to be swapped:
+	(It will swap i and i+1.)
+
+	>>> p.vineyards(2)
+
+****
+NOTE: The instructions below are outdated.
+(It still works, but it's safer to use the python wrappers for the C functions if you're using python to avoid segfaults and such for mishaps like putting in the wrong number of arguments.)
+****
+
+Typical stuff to run vineyards:
+
+	Initialize structs:
+
+	>>> p = pointer(PERSISTENCE())
+	>>> inc = pointer(MATRIX())
+	>>> red = pointer(MATRIX())
+	>>> md.init_persistence(p,inc,red)
+
+	Insert simplices into the incidence matrix:
+
+	>>> md.insert_simplex(p, 0b0)
+	>>> md.insert_simplex(p, 0b0)
+	>>> md.insert_simplex(p, 0b0)
+	>>> md.insert_simplex(p, 0b011)
+	
+	... etc ...
+
+	You can print your matrices at any point if you're so inclined:
+
+	>>> md.bv_print(p.contents.inc)
+	>>> md.bv_print(p.contents.red)
+
+	If you messed up, you can set a simplex to a different value. Give it p, the column you want to chance, and the value to be changed to:
+
+	>>> md.set_simplex(p, 3, 0b011)
+
+	To reduce:
+
+	>>> md.reduce(p)
+
+	To run vineyards, give it p and the first index to be swapped:
+
+	>>> md.vineyards(p, 2)
