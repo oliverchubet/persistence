@@ -1,3 +1,3 @@
-These are my contributions to Byvire/sheehy_is_2017, but that was a private repo, which was inconvenient.
+These are my contributions to Byvire/sheehy_is_2017
 
 I recommend staying in the ./py folder, I moved over from python from c, and the data structures in my c code are written in such a way that reading the code is kind of nauseating (whoops). The python code is more concise, although, I would consider revisiting the c later, so I'll keep it around.
