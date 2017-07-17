@@ -16,11 +16,16 @@
 
 ### CoPersistenceMatrix
 
-* A CoPersistenceMatrix is something I most recently added, just to have a seperate class to use the cohomology algorithm. It has a lowR (which, I called it that because of the vineyards paper, but maybe it's a terrible name). lowR is a dictionary where the values are sets of indices of columns whose lowest ones are equal to the key.
+* A CoPersistenceMatrix is something I most recently added, just to have a seperate class to use the cohomology algorithm. It has a lows (which, I called it that because of the vineyards paper, but maybe it's a terrible name). lows is a dictionary where the values are sets of indices of columns whose lowest ones are equal to the key. You have to update lows whenever you do a column or row operation otherwise when you accesses lows it could be using old information.
 
-* The kind of annoying thing is that you have to remember to update lowR whenever you do a column or row operation. I mean. I could just write a function to do it, but I'm being stubborn about it because I like writing column additions as ^ rather than the 'add_col' function.
+#### pHrow
 
-* The reduce algorithm (pHrow) in the CoPersistenceMatrix class comes from the paper, Dualities in persistent (co)homology - Silva, Morozov, and Johansson
+* The reduce algorithm (pHrow) in the CoPersistenceMatrix class comes from the paper, Dualities in persistent (co)homology - Silva, Morozov, and Johansson. I don't update dgm in this one because lows reduces to the persistence diagram.
+
+#### pCoh
+
+* The cohomology algorithm (pCoh) is from the same paper. The matrix R should be the transpose of the incidence matrix. It's supposedly an optimized version of pHrow.
+*TODO* : Add code to keep the reducing matrix updated. Right now I don't, because it's not used in this algorithm.
 
 ### Vineyard
 

@@ -67,22 +67,5 @@ class TestMatrix(unittest.TestCase):
         assert(m[0] == [0,1,3])
         assert(m[1] == [2,3,4])
 
-    def test_reduce(self):
-        m = Matrix()
-        m.insert_col([])
-        m.insert_col([])
-        m.insert_col([])
-        m.insert_col([0,1])
-        m.insert_col([1,2])
-        m.insert_col([0,2])
-        m.reduce()
-        assert(not m[0])
-        assert(not m[1])
-        assert(not m[2]) 
-        assert(m[3] == [0,1])
-        assert(m[4] == [1,2])
-        assert(not m[5])
-        
-
 if __name__ == '__main__':
     unittest.main()

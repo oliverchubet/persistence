@@ -22,17 +22,6 @@ class Matrix(list):
         self.add_row(j,i)
         self.add_row(i,j)
 
-    def reduce(self): # original persistence algorithm
-        for k1 in range(len(self)):
-            check = False
-            while not check:
-                check = True
-                for k2 in range(len(self)):
-                    if (self[k1] and self[k2]) \
-                        and (k2 < k1) and (max(self[k1]) == max(self[k2])):
-                        self.add_col(k2,k1)
-                        check = False
-
     def transpose(self):
         T = Matrix()
         for i in range(len(self)):
@@ -45,73 +34,67 @@ class Matrix(list):
 
 class PersistenceMatrix:
     def __init__(self):
-        self.inc = Matrix() # incidence matrix
-        self.red = Matrix() # reducing matrix
-        self.dgm = {}       # persistence diagram (birth:death)
+        self.R = Matrix() # incidence matrix
+        self.U = Matrix() # reducing matrix
+        self.dgm = {}       # persistence diagram (brith:death)
 
     def __len__(self):
-        return len(self.inc)
+        return len(self.R)
 
     def insert_col(self, col):
         col = SortedList(col)
-        self.inc.append(col)
-        self.red.append(SortedList([len(self)-1]))
+        self.R.append(col)
+        self.U.append(SortedList([len(self)-1]))
 
-    def reduce(self): # persistence algorithm that updates the reducing matrix and diagram
-        for k1 in range(len(self)):
-            if k1 and self.inc[k1-1]:
-                self.dgm[max(self.inc[k1-1])] = k1-1
-            check = False
-            while not check:
-                check = True
-                for k2 in range(k1):
-                    if self.inc[k1] and self.inc[k2] \
-                            and max(self.inc[k1]) == max(self.inc[k2]):
-                        self.inc.add_col(k2,k1)
-                        self.red.add_col(k2,k1)
-                        check = False
-        for x in range(len(self)): # arguably I don't need this
-            if not self.inc[x] and x not in self.dgm:
-                self.dgm[x] = "inf"
+    def reduce(self): # Better persistence algo :)
+        for k in range(len(self)):
+            while self.R[k]:
+                j = max(self.R[k])
+                if j in self.dgm:
+                    self.R.add_col(self.dgm[j],k)
+                    self.U.add_col(self.dgm[j],k)
+                else:
+                    self.dgm[j] = k
+                    break
 
 class CoPersistenceMatrix(PersistenceMatrix):
     def __init__(self):
         super().__init__()
-        self.lowR = {} # dictionary of sets of indices for lowest ones equal to j
+        self.lows = {} # dictionary of sets of indices for lowest ones equal to j
 
     def insert_col(self,col):
         super().insert_col(col)
         if col:
-            if max(col) in self.lowR:
-                self.lowR[max(col)].add(len(self)-1) 
+            if max(col) in self.lows:
+                self.lows[max(col)].add(len(self)-1) 
             else:
-                self.lowR[max(col)] = SortedList([len(self)-1])
+                self.lows[max(col)] = SortedList([len(self)-1])
 
     def pHrow(self): 
         for i in reversed(range(len(self))):
-            if i in self.lowR:
-                indices = self.lowR[i]
+            if i in self.lows:
+                indices = self.lows[i]
                 p = indices[0] 
                 for j in indices[1:]:
-                    self.inc[j] = self.inc[j] ^ self.inc[p]
-                    self.lowR[i].remove(j)
-                    if self.inc[j]:
-                        self.lowR[max(self.inc[j])].add(j)
-                    self.red[j] = self.red[j] ^ self.red[p]
+                    self.R[j] = self.R[j] ^ self.R[p]
+                    self.lows[i].remove(j)
+                    if self.R[j]:
+                        self.lows[max(self.R[j])].add(j)
+                    self.U[j] = self.U[j] ^ self.U[p]
 
     def pCoh(self):
         Z = []
         for i in range(len(self)):
             indices = []
             for j in Z:
-                if i in self.inc[j]:
+                if i in self.R[j]:
                     indices.append(j)
             if not indices:
                 Z.insert(0,i)
             else:
                 p = indices[0]
                 for j in indices[1:]:
-                    self.inc[j] = self.inc[j] ^ self.inc[p]
+                    self.R[j] = self.R[j] ^ self.R[p]
                 Z.remove(p)
                 self.dgm[p] = i
         
@@ -121,28 +104,28 @@ class Vineyard(PersistenceMatrix):
         self.vineyard = [] 
 
     def switcheroo(self,i):
-        self.inc.swap_col(i,i+1)
-        self.inc.swap_row(i,i+1)
-        self.red.swap_col(i,i+1)
-        self.red.swap_row(i,i+1)
+        self.R.swap_col(i,i+1)
+        self.R.swap_row(i,i+1)
+        self.U.swap_col(i,i+1)
+        self.U.swap_row(i,i+1)
 
     def col_row_op(self, m, n):
-        self.inc.add_col(m,n)
-        self.red.add_row(n,m)
+        self.R.add_col(m,n)
+        self.U.add_row(n,m)
 
     def vineyard_algo(self,i):
             self.vineyard.append([i,-1])
-            if not self.inc[i] and not self.inc[i+1]: # Case 1
-                if i in self.red[i+1]:
-                    self.red[i+1].remove(i)
+            if not self.R[i] and not self.R[i+1]: # Case 1
+                if i in self.U[i+1]:
+                    self.U[i+1].remove(i)
                 k = -1
                 l = -1
                 for n in range(len(self)):
-                    if self.inc[n] and max(self.inc[n]) == i:
+                    if self.R[n] and max(self.R[n]) == i:
                         k = n
-                    if self.inc[n] and max(self.inc[n]) == i+1:
+                    if self.R[n] and max(self.R[n]) == i+1:
                         l = n
-                if k != l and i in self.inc[l]: # Case 1.1
+                if k != l and i in self.R[l]: # Case 1.1
                     if k < l : # Case 1.1.1
                         self.switcheroo(i)
                         self.col_row_op(k,l) # PDP = (PRPV)(VPUP)
@@ -150,20 +133,20 @@ class Vineyard(PersistenceMatrix):
                         self.switcheroo(i)
                         self.col_row_op(l,k) # PDP = (PRPV)(VPUP)
                         self.vineyard[-1] = [i]
-            if self.inc[i] and self.inc[i+1]: # Case 2
-                if i in self.red[i+1]: # Case 2.1
+            if self.R[i] and self.R[i+1]: # Case 2
+                if i in self.U[i+1]: # Case 2.1
                     self.col_row_op(i,i+1)
                     self.switcheroo(i) # PDP = (PRWP)(PWUP)
-                    if max(self.inc[i]) == max(self.inc[i+1]): # Case 2.1.2
+                    if max(self.R[i]) == max(self.R[i+1]): # Case 2.1.2
                         self.col_row_op(i,i+1)
-                        self.vineyard[-1] = [i,max(self.inc[i+1]), max(self.inc[i])]
-            if self.inc[i] and not self.inc[i+1]: # Case 3
-                if i in self.red[i+1]: # Case 3.1
-                    self.vineyard[-1] = [i,max(self.inc[i])]
+                        self.vineyard[-1] = [i,max(self.R[i+1]), max(self.R[i])]
+            if self.R[i] and not self.R[i+1]: # Case 3
+                if i in self.U[i+1]: # Case 3.1
+                    self.vineyard[-1] = [i,max(self.R[i])]
                     self.col_row_op(i,i+1)
                     self.switcheroo(i)
                     self.col_row_op(i,i+1) # PDP = (PRWPW)(WPWUP)
-            if not self.inc[i] and self.inc[i+1]: # Case 4
-                if i in self.red[i+1]:
-                    self.red[i+1].remove(i)
+            if not self.R[i] and self.R[i+1]: # Case 4
+                if i in self.U[i+1]:
+                    self.U[i+1].remove(i)
 
