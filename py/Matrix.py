@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#/usr/bin/env python3
 
 from SortedList import *
 
@@ -32,6 +32,16 @@ class Matrix(list):
                         and (k2 < k1) and (max(self[k1]) == max(self[k2])):
                         self.add_col(k2,k1)
                         check = False
+
+    def transpose(self):
+        T = Matrix()
+        for i in range(len(self)):
+            L = SortedList()
+            for j in range(len(self)):
+                if i in self[j]:
+                    L.add(j)
+            T.insert_col(L)
+        return T
 
 class PersistenceMatrix:
     def __init__(self):
@@ -77,7 +87,7 @@ class CoPersistenceMatrix(PersistenceMatrix):
             else:
                 self.lowR[max(col)] = SortedList([len(self)-1])
 
-    def reduce(self): #pHrow
+    def pHrow(self): 
         for i in reversed(range(len(self))):
             if i in self.lowR:
                 indices = self.lowR[i]
@@ -88,6 +98,22 @@ class CoPersistenceMatrix(PersistenceMatrix):
                     if self.inc[j]:
                         self.lowR[max(self.inc[j])].add(j)
                     self.red[j] = self.red[j] ^ self.red[p]
+
+    def pCoh(self):
+        Z = []
+        for i in range(len(self)):
+            indices = []
+            for j in Z:
+                if i in self.inc[j]:
+                    indices.append(j)
+            if not indices:
+                Z.insert(0,i)
+            else:
+                p = indices[0]
+                for j in indices[1:]:
+                    self.inc[j] = self.inc[j] ^ self.inc[p]
+                Z.remove(p)
+                self.dgm[p] = i
         
 class Vineyard(PersistenceMatrix):
     def __init__(self):

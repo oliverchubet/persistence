@@ -21,7 +21,7 @@ class TestCoPersistenceMatrix(unittest.TestCase):
         assert(p.lowR[1] == [4])
         assert(p.lowR[3] == [5])
 
-    def test_reduce_triangle_reduce(self):
+    def test_pHrow_triangle(self):
         p = CoPersistenceMatrix()
         p.insert_col([])
         p.insert_col([])
@@ -30,7 +30,7 @@ class TestCoPersistenceMatrix(unittest.TestCase):
         p.insert_col([1,2])
         p.insert_col([2,3])
         p.insert_col([1,3])
-        p.reduce()
+        p.pHrow()
         for n in {0,1,2,3,6}:
             assert(not p.inc[n])
         for n in range(5):
@@ -44,7 +44,7 @@ class TestCoPersistenceMatrix(unittest.TestCase):
             #assert(p.dgm[x] == "inf")
             break
 
-    def test_reduce_sphere_reduce(self):
+    def test_pHrow_sphere(self):
         p = CoPersistenceMatrix()
         p.insert_col([])
         p.insert_col([])
@@ -52,7 +52,7 @@ class TestCoPersistenceMatrix(unittest.TestCase):
         p.insert_col([0,1])
         p.insert_col([2,3])
         p.insert_col([2,3])
-        p.reduce()
+        p.pHrow()
         assert(not p.inc[3])
         assert(not p.inc[5])
         assert(p.red[3] == [2,3])
@@ -61,6 +61,21 @@ class TestCoPersistenceMatrix(unittest.TestCase):
         #assert(p.dgm[3] == 4)
         #assert(p.dgm[0] == "inf")
         #assert(p.dgm[5] == "inf")
+
+    def test_pCoh_triangle(self):
+        p = CoPersistenceMatrix()
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([0,1])
+        p.insert_col([1,2])
+        p.insert_col([0,2])
+        p.insert_col([3,4,5])
+        p.inc = p.inc.transpose()
+        p.pCoh()
+        assert(p.dgm[1] == 3)
+        assert(p.dgm[2] == 4)
+        assert(p.dgm[5] == 6)
 
 if __name__ == '__main__':
     unittest.main()
