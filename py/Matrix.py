@@ -47,15 +47,25 @@ class PersistenceMatrix:
         self.U.append(SortedList([len(self)-1]))
 
     def reduce(self): # Better persistence algo :)
-        for k in range(len(self)):
-            while self.R[k]:
-                j = max(self.R[k])
+        for i in range(len(self)):
+            while self.R[i]:
+                j = max(self.R[i])
                 if j in self.dgm:
-                    self.R.add_col(self.dgm[j],k)
-                    self.U.add_col(self.dgm[j],k)
+                    self.R.add_col(self.dgm[j],i)
+                    self.U.add_col(self.dgm[j],i)
                 else:
-                    self.dgm[j] = k
+                    self.dgm[j] = i
                     break
+
+    def future_reduce(self): # From the Kerber paper
+        for i in range(len(self)):
+            if self.R[i]:
+                low = max(self.R[i])
+                self.dgm[low] = i
+                for j in range(i+1,len(self)):
+                    if low in self.R[j]:
+                        self.U.add_col(i,j)
+                        self.R.add_col(i,j)
 
 class CoPersistenceMatrix(PersistenceMatrix):
     def __init__(self):

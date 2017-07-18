@@ -54,8 +54,42 @@ class TestPersistenceMatrix(unittest.TestCase):
         assert(p.U[5] == [4,5])
         assert(p.dgm[1] == 2)
         assert(p.dgm[3] == 4)
-        # assert(p.dgm[0] == "inf")
-        # assert(p.dgm[5] == "inf")
+
+    def test_future_reduce_triangle(self):
+        p = PersistenceMatrix()
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([1,2])
+        p.insert_col([2,3])
+        p.insert_col([1,3])
+        p.future_reduce()
+        for n in {0,1,2,3,6}:
+            assert(not p.R[n])
+        for n in range(5):
+            assert(p.U[n] == [n])
+        assert(p.U[6] == [4,5,6])
+        assert(max(p.R[5]) == 3)
+        assert(max(p.R[4]) == 2)
+        assert(p.dgm[2] == 4)
+        assert(p.dgm[3] == 5)
+
+    def test_future_reduce_sphere(self):
+        p = PersistenceMatrix()
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([0,1])
+        p.insert_col([0,1])
+        p.insert_col([2,3])
+        p.insert_col([2,3])
+        p.future_reduce()
+        assert(not p.R[3])
+        assert(not p.R[5])
+        assert(p.U[3] == [2,3])
+        assert(p.U[5] == [4,5])
+        assert(p.dgm[1] == 2)
+        assert(p.dgm[3] == 4)
 
 if __name__ == '__main__':
     unittest.main()
