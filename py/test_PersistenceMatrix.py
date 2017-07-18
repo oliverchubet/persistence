@@ -1,8 +1,48 @@
 import unittest
 from Matrix import *
 
-class TestPersistenceMatrix(unittest.TestCase):
 
+def setup_triangle():
+    p = PersistenceMatrix()
+    p.insert_col([])
+    p.insert_col([])
+    p.insert_col([])
+    p.insert_col([])
+    p.insert_col([1,2])
+    p.insert_col([2,3])
+    p.insert_col([1,3])
+    return p
+
+def setup_sphere():
+    p = PersistenceMatrix()
+    p.insert_col([])
+    p.insert_col([])
+    p.insert_col([0,1])
+    p.insert_col([0,1])
+    p.insert_col([2,3])
+    p.insert_col([2,3])
+    return p
+
+def reduced_triangle_assertions(p):
+    for n in {0,1,2,3,6}:
+        assert(not p.R[n])
+    for n in range(5):
+        assert(p.U[n] == [n])
+    assert(p.U[6] == [4,5,6])
+    assert(max(p.R[5]) == 3)
+    assert(max(p.R[4]) == 2)
+    assert(p.dgm[2] == 4)
+    assert(p.dgm[3] == 5)
+
+def reduced_sphere_assertions(p):
+        assert(not p.R[3])
+        assert(not p.R[5])
+        assert(p.U[3] == [2,3])
+        assert(p.U[5] == [4,5])
+        assert(p.dgm[1] == 2)
+        assert(p.dgm[3] == 4)
+
+class TestPersistenceMatrix(unittest.TestCase):
     def test_init(self):
         p = PersistenceMatrix()
 
@@ -20,76 +60,34 @@ class TestPersistenceMatrix(unittest.TestCase):
         assert(p.R[5] == [1,3])
 
     def test_reduce_triangle(self):
-        p = PersistenceMatrix()
-        p.insert_col([])
-        p.insert_col([])
-        p.insert_col([])
-        p.insert_col([])
-        p.insert_col([1,2])
-        p.insert_col([2,3])
-        p.insert_col([1,3])
+        p = setup_triangle()
         p.reduce()
-        for n in {0,1,2,3,6}:
-            assert(not p.R[n])
-        for n in range(5):
-            assert(p.U[n] == [n])
-        assert(p.U[6] == [4,5,6])
-        assert(p.R[5] == [2,3])
-        assert(p.R[4] == [1,2])
-        assert(p.dgm[2] == 4)
-        assert(p.dgm[3] == 5)
+        reduced_triangle_assertions(p)
 
     def test_reduce_sphere(self):
-        p = PersistenceMatrix()
-        p.insert_col([])
-        p.insert_col([])
-        p.insert_col([0,1])
-        p.insert_col([0,1])
-        p.insert_col([2,3])
-        p.insert_col([2,3])
+        p = setup_sphere()
         p.reduce()
-        assert(not p.R[3])
-        assert(not p.R[5])
-        assert(p.U[3] == [2,3])
-        assert(p.U[5] == [4,5])
-        assert(p.dgm[1] == 2)
-        assert(p.dgm[3] == 4)
+        reduced_sphere_assertions(p)
 
     def test_future_reduce_triangle(self):
-        p = PersistenceMatrix()
-        p.insert_col([])
-        p.insert_col([])
-        p.insert_col([])
-        p.insert_col([])
-        p.insert_col([1,2])
-        p.insert_col([2,3])
-        p.insert_col([1,3])
+        p = setup_triangle() 
         p.future_reduce()
-        for n in {0,1,2,3,6}:
-            assert(not p.R[n])
-        for n in range(5):
-            assert(p.U[n] == [n])
-        assert(p.U[6] == [4,5,6])
-        assert(max(p.R[5]) == 3)
-        assert(max(p.R[4]) == 2)
-        assert(p.dgm[2] == 4)
-        assert(p.dgm[3] == 5)
+        reduced_triangle_assertions(p)
 
     def test_future_reduce_sphere(self):
-        p = PersistenceMatrix()
-        p.insert_col([])
-        p.insert_col([])
-        p.insert_col([0,1])
-        p.insert_col([0,1])
-        p.insert_col([2,3])
-        p.insert_col([2,3])
+        p = setup_sphere() 
         p.future_reduce()
-        assert(not p.R[3])
-        assert(not p.R[5])
-        assert(p.U[3] == [2,3])
-        assert(p.U[5] == [4,5])
-        assert(p.dgm[1] == 2)
-        assert(p.dgm[3] == 4)
+        reduced_sphere_assertions(p)
+
+    def test_orig_reduce_triangle(self):
+        p = setup_triangle() 
+        p.orig_reduce()
+        reduced_triangle_assertions(p)
+
+    def test_orig_reduce_sphere(self):
+        p = setup_sphere() 
+        p.orig_reduce()
+        reduced_sphere_assertions(p)
 
 if __name__ == '__main__':
     unittest.main()

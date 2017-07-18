@@ -12,11 +12,11 @@
 
 * I guess the columns of the reducing matrix represent coefficients for a linear combination of whatever simplices the corresponding column is currently comprised of, including the original simplex that was there. So for example, before reduction it's just the identity matrix because each column has only itself, and nothing's been added to it yet.
 
-* You don't actually need the reducing matrix for any persistence algorithm. I just have it updated while running the persistence algorithm so that the reducing matrix can be used for the vineyard algorithm.
+* You don't actually need the reducing matrix for any persistence algorithm, but you do need it for the vineyard algorithm.
 
 ### CoPersistenceMatrix
 
-* A CoPersistenceMatrix is something I most recently added, just to have a seperate class to use the cohomology algorithm. It has a lows (which, I called it that because of the vineyards paper, but maybe it's a terrible name). lows is a dictionary where the values are sets of indices of columns whose lowest ones are equal to the key. You have to update lows whenever you do a column or row operation otherwise when you accesses lows it could be using old information.
+* A CoPersistenceMatrix is something I most recently added, just to have a seperate class to use the cohomology algorithm. It has a lows which is a dictionary where the values are sets of indices of columns whose lowest ones are equal to the key. You have to update lows whenever you do a column or row operation otherwise when you accesses lows it could be using old information.
 
 #### pHrow
 
@@ -24,8 +24,7 @@
 
 #### pCoh
 
-* The cohomology algorithm (pCoh) is from the same paper. The matrix R should be the transpose of the incidence matrix. It's supposedly an optimized version of pHrow.
-*TODO* : Add code to keep the reducing matrix updated. Right now I don't, because it's not used in this algorithm.
+* The cohomology algorithm (pCoh) is from the same paper. The matrix R should be the transpose of the incidence matrix. 
 
 ### Vineyard
 
