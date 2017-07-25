@@ -116,10 +116,10 @@ class CoPersistenceMatrix(PersistenceMatrix):
                 if i in self.R[j]:
                     indices.append(j)
             if not indices:
-                Z.insert(0,i)
+                Z.append(i)
             else:
-                p = indices[0]
-                for j in indices[1:]:
+                p = indices.pop()
+                for j in reversed(indices):
                     self.R[j] = self.R[j] ^ self.R[p]
                     self.U[j] = self.U[j] ^ self.U[p]
                 Z.remove(p)

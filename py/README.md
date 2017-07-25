@@ -16,7 +16,7 @@
 
 ### CoPersistenceMatrix
 
-* A CoPersistenceMatrix is something I most recently added, just to have a seperate class to use the cohomology algorithm. It has a lows which is a dictionary where the values are sets of indices of columns whose lowest ones are equal to the key. You have to update lows whenever you do a column or row operation otherwise when you accesses lows it could be using old information.
+* A CoPersistenceMatrix is just to have a seperate class to use the cohomology algorithm. It has lows which is a dictionary where the values are sets of indices of columns whose lowest ones are equal to the key. You have to update lows whenever you do a column or row operation otherwise when you accesses lows it could be using old information.
 
 #### pHrow
 
