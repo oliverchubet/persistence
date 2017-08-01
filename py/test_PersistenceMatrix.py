@@ -79,15 +79,5 @@ class TestPersistenceMatrix(unittest.TestCase):
         p.future_reduce()
         reduced_sphere_assertions(p)
 
-    def test_orig_reduce_triangle(self):
-        p = setup_triangle() 
-        p.orig_reduce()
-        reduced_triangle_assertions(p)
-
-    def test_orig_reduce_sphere(self):
-        p = setup_sphere() 
-        p.orig_reduce()
-        reduced_sphere_assertions(p)
-
 if __name__ == '__main__':
     unittest.main()

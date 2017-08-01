@@ -46,7 +46,7 @@ class PersistenceMatrix:
         self.R.append(col)
         self.U.append(SortedList([len(self)-1]))
 
-    def reduce(self): # My persistence algorithm :)
+    def reduce(self): # Optimized original persistence algo
         for i in range(len(self)):
             while self.R[i]:
                 j = max(self.R[i])
@@ -56,22 +56,6 @@ class PersistenceMatrix:
                 else:
                     self.dgm[j] = i
                     break
-
-    def orig_reduce(self): # The original persistence algo
-        for i in range(len(self)):
-            if self.R[i]:
-                j = 0
-                while j < i:
-                    low = max(self.R[i])
-                    if self.R[j] and max(self.R[j]) == low:
-                        self.R[i] = self.R[i] ^ self.R[j]
-                        self.U[i] = self.U[i] ^ self.U[j]
-                        j = 0 if self.R[i] else i
-                    else:
-                        j += 1
-                if self.R[i]:
-                    self.dgm[max(self.R[i])] = i
-                
 
     def future_reduce(self): # From the Kerber paper
         for i in range(len(self)):
@@ -84,31 +68,26 @@ class PersistenceMatrix:
                         self.R.add_col(i,j)
 
 class CoPersistenceMatrix(PersistenceMatrix):
-    def __init__(self):
-        super().__init__()
-        self.lows = {} # dictionary of sets of indices for lowest ones equal to j
-
-    def insert_col(self,col):
-        super().insert_col(col)
-        if col:
-            if max(col) in self.lows:
-                self.lows[max(col)].add(len(self)-1) 
-            else:
-                self.lows[max(col)] = SortedList([len(self)-1])
-
-    def pHrow(self): 
+    def pHrow(self):
+        lows = {}
+        for i in range(len(self)):
+            if self.R[i]:
+                if self.R[i][0] in lows:
+                    lows[self.R[i][0]].append(i)
+                else:
+                    lows[self.R[i][0]] = [i]
         for i in reversed(range(len(self))):
-            if i in self.lows:
-                indices = self.lows[i]
-                p = indices[0] 
-                for j in indices[1:]:
+            if i in lows:
+                indices = lows[i]
+                p = indices.pop()
+                for j in indices:
                     self.R[j] = self.R[j] ^ self.R[p]
-                    self.lows[i].remove(j)
-                    if self.R[j]:
-                        self.lows[max(self.R[j])].add(j)
                     self.U[j] = self.U[j] ^ self.U[p]
+                self.dgm[p] = min(self.R[p])
 
-    def pCoh(self):
+    def pCoh(self): # maybe it would be better if columns were passed in one at a time and Z was a dictionary of columns
+                    # otherwise you're not really "throwing out" columns
+                    # but there's no point throwing things out if you're given it all at once because it'll just take up time to delete stuff and your max space is still whatever they originally gave you
         Z = []
         for i in range(len(self)):
             indices = []
@@ -124,7 +103,7 @@ class CoPersistenceMatrix(PersistenceMatrix):
                     self.U[j] = self.U[j] ^ self.U[p]
                 Z.remove(p)
                 self.dgm[p] = i
-        
+
 class Vineyard(PersistenceMatrix):
     def __init__(self):
         super().__init__()
