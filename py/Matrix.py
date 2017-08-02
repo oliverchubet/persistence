@@ -1,6 +1,7 @@
 #/usr/bin/env python3
 
 from SortedList import *
+from UnionFind import *
 
 class Matrix(list):
     def insert_col(self, col):
@@ -83,11 +84,9 @@ class CoPersistenceMatrix(PersistenceMatrix):
                 for j in indices:
                     self.R[j] = self.R[j] ^ self.R[p]
                     self.U[j] = self.U[j] ^ self.U[p]
-                self.dgm[p] = min(self.R[p])
+                self.dgm[p] = i 
 
-    def pCoh(self): # maybe it would be better if columns were passed in one at a time and Z was a dictionary of columns
-                    # otherwise you're not really "throwing out" columns
-                    # but there's no point throwing things out if you're given it all at once because it'll just take up time to delete stuff and your max space is still whatever they originally gave you
+    def pCoh(self):
         Z = []
         for i in range(len(self)):
             indices = []
@@ -104,12 +103,34 @@ class CoPersistenceMatrix(PersistenceMatrix):
                 Z.remove(p)
                 self.dgm[p] = i
 
+    def annotations(self):
+        uf = UnionFind(range(len(self)))
+        av = {}     # annotation vectors
+        avT = {}    # transpose of annotation vectors
+        for i in range(len(self)):
+            temp = SortedList() # so that I can use ^
+            for j in self.R[i]:
+                if j in av:
+                    temp ^= av[j]
+            if not temp:
+                av[i] = SortedList([i])
+                avT[i] = [i]
+            else:
+                low = temp.pop()
+                av[i] = temp
+                for j in temp:
+                    avT[j].append(i)
+                for k in avT.pop(low):
+                    av[k].remove(low)
+                    av[k] = av[k] ^ temp
+                self.dgm[low] = i
+
 class Vineyard(PersistenceMatrix):
     def __init__(self):
         super().__init__()
         self.vineyard = [] 
 
-    def switcheroo(self,i):
+    def switcheroo(self,i): # the old vineyard switcheroo
         self.R.swap_col(i,i+1)
         self.R.swap_row(i,i+1)
         self.U.swap_col(i,i+1)

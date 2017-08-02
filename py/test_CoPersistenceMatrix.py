@@ -48,6 +48,32 @@ class TestCoPersistenceMatrix(unittest.TestCase):
         assert(p.dgm[2] == 4)
         assert(p.dgm[5] == 6)
 
+    def test_annotations_triangle(self):
+        p = CoPersistenceMatrix()
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([0,1])
+        p.insert_col([1,2])
+        p.insert_col([0,2])
+        p.insert_col([3,4,5])
+        p.annotations()
+        assert(p.dgm[1] == 3)
+        assert(p.dgm[2] == 4)
+        assert(p.dgm[5] == 6)
+
+    def test_pHrow_sphere(self):
+        p = CoPersistenceMatrix()
+        p.insert_col([])
+        p.insert_col([])
+        p.insert_col([0,1])
+        p.insert_col([0,1])
+        p.insert_col([2,3])
+        p.insert_col([2,3])
+        p.annotations()
+        assert(p.dgm[1] == 2)
+        assert(p.dgm[3] == 4)
+
 if __name__ == '__main__':
     unittest.main()
 

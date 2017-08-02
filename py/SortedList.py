@@ -11,6 +11,9 @@ class SortedList():
     def add(self, item):
         self._L.insert(self._index(item),item)
 
+    def pop(self):
+        return self._L.pop()
+
     def remove(self, item):
         self._L.remove(item)
 
