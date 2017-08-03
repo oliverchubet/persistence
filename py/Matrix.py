@@ -37,7 +37,7 @@ class PersistenceMatrix:
     def __init__(self):
         self.R = Matrix() # incidence matrix
         self.U = Matrix() # reducing matrix
-        self.dgm = {}       # persistence diagram (brith:death)
+        self.dgm = {}       # persistence diagram (birth:death)
 
     def __len__(self):
         return len(self.R)
@@ -103,8 +103,7 @@ class CoPersistenceMatrix(PersistenceMatrix):
                 Z.remove(p)
                 self.dgm[p] = i
 
-    def annotations(self):
-        uf = UnionFind(range(len(self)))
+    def annotations(self): # doesn't use union-find
         av = {}     # annotation vectors
         avT = {}    # transpose of annotation vectors
         for i in range(len(self)):

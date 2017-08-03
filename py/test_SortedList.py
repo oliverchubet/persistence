@@ -5,17 +5,19 @@ class TestSortedList(unittest.TestCase):
     
     def test_init(self):
         s = SortedList()
+        p = SortedList([9,7,8])
+        assert(p == [7,8,9])
 
     def test_add(self):
         s = SortedList()
         for i in range(10):
             s.add(i + (-1)**i)
-        assert(s._L == [0,1,2,3,4,5,6,7,8,9])
+        assert(s == [0,1,2,3,4,5,6,7,8,9])
         s = SortedList()
         assert(not s)
         for i in {2,5,8,0,1,3}:
             s.add(i)
-        assert(s._L == [0,1,2,3,5,8])
+        assert(s == [0,1,2,3,5,8])
 
     def test_remove(self):
         s = SortedList()
@@ -23,7 +25,7 @@ class TestSortedList(unittest.TestCase):
             s.add(i + (-1)**i)
         for i in range(10):
             s.remove(i)
-        assert(not s._L)
+        assert(not s)
 
     def test_getitem(self):
         s = SortedList()
@@ -68,3 +70,14 @@ class TestSortedList(unittest.TestCase):
         q = SortedList([1,2,4,5])
         assert(s == [1,2,4,5])
         assert(s == q)
+
+    def test_sub(self):
+        s = SortedList([1,4,5])
+        o = SortedList([9,8,7])
+        s - o
+        assert(s == [1,4,5,7,8,9])
+        assert(o == [7,8,9])
+        p = SortedList([1,2,4,5])
+        s - p
+        assert(s == [2,7,8,9])
+        assert(p == [1,2,4,5])

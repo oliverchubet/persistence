@@ -1,24 +1,19 @@
-import itertools
-
-class SortedList():
+class SortedList(list):
 
     def __init__(self, L=None):
-        self._L = []
         if L:
             for i in L:
                 self.add(i)
 
     def add(self, item):
-        self._L.insert(self._index(item),item)
+        self.insert(self._index(item),item)
 
-    def pop(self):
-        return self._L.pop()
+    def append(self, item):
+        self.add(item)
 
-    def remove(self, item):
-        self._L.remove(item)
-
-    def __getitem__(self, index):
-        return self._L[index]
+    def extend(self, other):
+        for i in other:
+            self.add(i)
 
     def __contains__(self, item):
         i = self._index(item)
@@ -34,29 +29,27 @@ class SortedList():
                 L = M+1
         return R
 
-    def __len__(self):
-        return len(self._L)
-
-    def __iter__(self):
-        return iter(self._L)
-
     def max(self):
         return self[-1]
     
     def min(self):
         return self[0]
 
-    def __str__(self):
-        return self._L.__str__()
-
-    def __repr__(self):
-        return self._L.__repr__()
-
-    def __eq__(self, other):
-        try:
-            return self._L == other._L
-        except AttributeError:
-            return self._L == other
-
     def __xor__(self, other):
         return SortedList(set(self) ^ set(other))
+
+    def __sub__(self, other):
+        temp = []
+        otemp = list(other)
+        while self and otemp:
+            slast, olast = self.pop(), otemp.pop()
+            if slast > olast:
+                temp.append(slast)
+                otemp.append(olast)
+            elif slast < olast:
+                temp.append(olast)
+                self.append(slast)
+        while temp:
+            self.append(temp.pop())
+        self.extend(otemp)
+
