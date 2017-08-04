@@ -47,7 +47,7 @@ class PersistenceMatrix:
         self.R.append(col)
         self.U.append(SortedList([len(self)-1]))
 
-    def reduce(self): # Optimized original persistence algo
+    def reduce(self): # original persistence algo
         for i in range(len(self)):
             while self.R[i]:
                 j = max(self.R[i])
@@ -68,6 +68,26 @@ class PersistenceMatrix:
                         self.U.add_col(i,j)
                         self.R.add_col(i,j)
 
+    def iso_reordering(self): # returns backwards and only does dfs down
+        rT = self.R.transpose()
+        tops, order, marks = set(), [], set() 
+        for i in range(len(self)):
+            if not rT[i]:
+                tops.add(i)
+        for t in tops:
+            stack = [t]
+            temp = []
+            while stack:
+                if stack[-1] in marks:
+                    stack.pop()
+                else:
+                    temp.append(stack[-1])
+                    marks.add(stack[-1])
+                    stack.extend(self.R[stack.pop()])
+            temp.extend(order)
+            order = temp
+        return order
+        
 class CoPersistenceMatrix(PersistenceMatrix):
     def pHrow(self):
         lows = {}

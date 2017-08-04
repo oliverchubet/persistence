@@ -79,5 +79,9 @@ class TestPersistenceMatrix(unittest.TestCase):
         p.future_reduce()
         reduced_sphere_assertions(p)
 
+    def test_iso_reordering(self):
+        p = setup_triangle()
+        p.iso_reordering()
+
 if __name__ == '__main__':
     unittest.main()
