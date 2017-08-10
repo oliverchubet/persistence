@@ -2,6 +2,7 @@
 
 from SortedList import *
 from UnionFind import *
+import time
 
 class Matrix(list):
     def insert_col(self, col):
@@ -67,6 +68,18 @@ class PersistenceMatrix:
                     if low in self.R[j]:
                         self.U.add_col(i,j)
                         self.R.add_col(i,j)
+
+    def spectral_reduce(self): 
+        for r in range(len(self)):
+            for j in range(r,len(self)):
+                while self.R[j] and max(self.R[j]) > j-r:
+                    low = max(self.R[j])
+                    if low in self.dgm and self.dgm[low] is not j:
+                        self.R.add_col(self.dgm[low], j)
+                        self.U.add_col(self.dgm[low], j)
+                    else:
+                        self.dgm[low] = j
+                        break
 
     def iso_reordering(self): # returns backwards and only does dfs down
         rT = self.R.transpose()
