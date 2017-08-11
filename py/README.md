@@ -12,19 +12,27 @@
 
 * I guess the columns of the reducing matrix represent coefficients for a linear combination of whatever simplices the corresponding column is currently comprised of, including the original simplex that was there. So for example, before reduction it's just the identity matrix because each column has only itself, and nothing's been added to it yet.
 
-* You don't actually need the reducing matrix for any persistence algorithm, but you do need it for the vineyard algorithm.
+* You don't actually need the reducing matrix for any persistence algorithm, but it keeps track of the column additions done and you do need it for the vineyard algorithm.
+
+## iso_reordering
+
+* If you want an order to add simplices such that your homology is always of minimum dimension. Although right now this method returns the order backwards. It does uses the simplices that have no coboundary and does DFS downwards (via boundary operator).
+
+### spectral_reduce:
+
+* Reduces from the diagonal out. I don't acturally understand the connection to spectral sequences, but you get the same diagram as the normal persistence algorithm.
 
 ### CoPersistenceMatrix
 
-* A CoPersistenceMatrix is just to have a seperate class to use the cohomology algorithm. It has lows which is a dictionary where the values are sets of indices of columns whose lowest ones are equal to the key. You have to update lows whenever you do a column or row operation otherwise when you accesses lows it could be using old information.
+* A CoPersistenceMatrix is just to have a seperate class to use cohomology algorithms. The difference is the functions expect self.R to be a coboundary matrix.
 
-#### pHrow
+#### pHrow and pCoh
 
-* The reduce algorithm (pHrow) in the CoPersistenceMatrix class comes from the paper, Dualities in persistent (co)homology - Silva, Morozov, and Johansson. I don't update dgm in this one because lows reduces to the persistence diagram.
+* Comes from the paper, Dualities in persistent (co)homology - Silva, Morozov, and Johansson.
 
-#### pCoh
+### annotations:
 
-* The cohomology algorithm (pCoh) is from the same paper. The matrix R should be the transpose of the incidence matrix. 
+* Supposedly you can make this better by putting the columns with the same annotation in a union-find structure, but I don't think I have a good data structure or fast algorithm for determining the rows with the same annotations, so this doesn't implement union-find.
 
 ### Vineyard
 

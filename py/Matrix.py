@@ -69,7 +69,7 @@ class PersistenceMatrix:
                         self.U.add_col(i,j)
                         self.R.add_col(i,j)
 
-    def spectral_reduce(self): 
+    def spectral_reduce(self): # from Harer and Edelsbrunner
         for r in range(len(self)):
             for j in range(r,len(self)):
                 while self.R[j] and max(self.R[j]) > j-r:
