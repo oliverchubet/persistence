@@ -23,6 +23,21 @@ def setup_sphere():
     p.insert_col([2,3])
     return p
 
+def setup_line():
+    p = PersistenceMatrix()
+    p.insert_col([])
+    p.insert_col([])
+    p.insert_col([0,1])
+    p.insert_col([])
+    p.insert_col([3,1])
+    p.insert_col([])
+    p.insert_col([5,3])
+    p.insert_col([])
+    p.insert_col([7,5])
+    p.insert_col([])
+    p.insert_col([9,7])
+    p.insert_col([])
+
 def reduced_triangle_assertions(p):
     for n in {0,1,2,3,6}:
         assert(not p.R[n])
@@ -41,6 +56,15 @@ def reduced_sphere_assertions(p):
         assert(p.U[5] == [4,5])
         assert(p.dgm[1] == 2)
         assert(p.dgm[3] == 4)
+
+def reduced_line_assertions(p):
+    assert(p.dgm[1] == 2)
+    assert(p.dgm[3] == 4)
+    assert(p.dgm[5] == 6)
+    assert(p.dgm[7] == 8)
+    assert(p.dgm[9] == 10)
+    assert(not p.dgm[11])
+    assert(not p.dgm[0])
 
 class TestPersistenceMatrix(unittest.TestCase):
     def test_init(self):

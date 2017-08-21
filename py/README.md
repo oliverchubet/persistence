@@ -16,7 +16,7 @@
 
 ## iso_reordering
 
-* If you want an order to add simplices such that your homology is always of minimum dimension. Although right now this method returns the order backwards. It does uses the simplices that have no coboundary and does DFS downwards (via boundary operator).
+* If you want an order to add simplices such that your homology is always of minimum dimension. Although right now this method returns the order backwards. It uses the simplices that have no coboundary and does DFS downwards (via boundary operator).
 
 ### spectral_reduce:
 
