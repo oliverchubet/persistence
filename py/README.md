@@ -18,9 +18,17 @@
 
 * If you want an order to add simplices such that your homology is always of minimum dimension. Although right now this method returns the order backwards. It uses the simplices that have no coboundary and does DFS downwards (via boundary operator).
 
+Comes from paper, The Compressed Annotation Matrix: An Efficient Data Structure for Computing Persistent Homology - Boissonnat, Dey, Maria
+
 ### spectral_reduce:
 
 * Reduces from the diagonal out. I don't acturally understand the connection to spectral sequences, but you get the same diagram as the normal persistence algorithm.
+
+Comes from Edelsbrunner and Harer textbook.
+
+### future_reduce:
+
+Comes from paper, Persistent Homology and Nested Dissection - Kerber, Sheehy, Skraba
 
 ### CoPersistenceMatrix
 
@@ -33,6 +41,8 @@
 ### annotations:
 
 * Supposedly you can make this better by putting the columns with the same annotation in a union-find structure, but I don't think I have a good data structure or fast algorithm for determining the rows with the same annotations, so this doesn't implement union-find.
+
+Comes from paper, The Compressed Annotation Matrix: An Efficient Data Structure for Computing Persistent Homology - Boissonnat, Dey, Maria
 
 ### Vineyard
 
