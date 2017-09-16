@@ -2,7 +2,7 @@
 
 from SortedList import *
 from UnionFind import *
-import time
+
 
 class Matrix(list):
     def insert_col(self, col):
@@ -34,7 +34,9 @@ class Matrix(list):
             T.insert_col(L)
         return T
 
+
 class PersistenceMatrix:
+
     def __init__(self):
         self.R = Matrix() # incidence matrix
         self.U = Matrix() # reducing matrix
@@ -42,6 +44,10 @@ class PersistenceMatrix:
 
     def __len__(self):
         return len(self.R)
+
+    def insert(self, *columns):
+        for col in columns:
+            self.insert_col(col)
 
     def insert_col(self, col):
         col = SortedList(col)
@@ -59,31 +65,9 @@ class PersistenceMatrix:
                     self.dgm[j] = i
                     break
 
-    def future_reduce(self): # From the Kerber paper
-        for i in range(len(self)):
-            if self.R[i]:
-                low = max(self.R[i])
-                self.dgm[low] = i
-                for j in range(i+1,len(self)):
-                    if low in self.R[j]:
-                        self.U.add_col(i,j)
-                        self.R.add_col(i,j)
-
-    def spectral_reduce(self): # from Harer and Edelsbrunner
-        for r in range(len(self)):
-            for j in range(r,len(self)):
-                while self.R[j] and max(self.R[j]) > j-r:
-                    low = max(self.R[j])
-                    if low in self.dgm and self.dgm[low] is not j:
-                        self.R.add_col(self.dgm[low], j)
-                        self.U.add_col(self.dgm[low], j)
-                    else:
-                        self.dgm[low] = j
-                        break
-
     def iso_reordering(self): # returns backwards and only does dfs down
         rT = self.R.transpose()
-        tops, order, marks = set(), [], set() 
+        tops, order, marks = set(), [], set()
         for i in range(len(self)):
             if not rT[i]:
                 tops.add(i)
@@ -100,8 +84,10 @@ class PersistenceMatrix:
             temp.extend(order)
             order = temp
         return order
-        
+
+
 class CoPersistenceMatrix(PersistenceMatrix):
+
     def pHrow(self):
         lows = {}
         for i in range(len(self)):
@@ -117,7 +103,7 @@ class CoPersistenceMatrix(PersistenceMatrix):
                 for j in indices:
                     self.R[j] = self.R[j] ^ self.R[p]
                     self.U[j] = self.U[j] ^ self.U[p]
-                self.dgm[p] = i 
+                self.dgm[p] = i
 
     def pCoh(self):
         Z = []
@@ -157,10 +143,40 @@ class CoPersistenceMatrix(PersistenceMatrix):
                     av[k] = av[k] ^ temp
                 self.dgm[low] = i
 
+
+class SpectralPersistenceMatrix(PersistenceMatrix):
+    """from Harer and Edelsbrunner"""
+
+    def reduce(self):
+        for r in range(len(self)):
+            for j in range(r,len(self)):
+                while self.R[j] and max(self.R[j]) > j-r:
+                    low = max(self.R[j])
+                    if low in self.dgm and self.dgm[low] is not j:
+                        self.R.add_col(self.dgm[low], j)
+                        self.U.add_col(self.dgm[low], j)
+                    else:
+                        self.dgm[low] = j
+                        break
+
+
+class FuturePersistenceMatrix(PersistenceMatrix):
+
+    def reduce(self): # From the Kerber paper
+        for i in range(len(self)):
+            if self.R[i]:
+                low = max(self.R[i])
+                self.dgm[low] = i
+                for j in range(i+1,len(self)):
+                    if low in self.R[j]:
+                        self.U.add_col(i,j)
+                        self.R.add_col(i,j)
+
+
 class Vineyard(PersistenceMatrix):
     def __init__(self):
         super().__init__()
-        self.vineyard = [] 
+        self.vineyard = []
 
     def switcheroo(self,i): # the old vineyard switcheroo
         self.R.swap_col(i,i+1)
@@ -173,39 +189,38 @@ class Vineyard(PersistenceMatrix):
         self.U.add_row(n,m)
 
     def vineyard_algo(self,i):
-            self.vineyard.append([i,-1])
-            if not self.R[i] and not self.R[i+1]: # Case 1
-                if i in self.U[i+1]:
-                    self.U[i+1].remove(i)
-                k = -1
-                l = -1
-                for n in range(len(self)):
-                    if self.R[n] and max(self.R[n]) == i:
-                        k = n
-                    if self.R[n] and max(self.R[n]) == i+1:
-                        l = n
-                if k != l and i in self.R[l]: # Case 1.1
-                    if k < l : # Case 1.1.1
-                        self.switcheroo(i)
-                        self.col_row_op(k,l) # PDP = (PRPV)(VPUP)
-                    if l < k : # Case 1.1.2
-                        self.switcheroo(i)
-                        self.col_row_op(l,k) # PDP = (PRPV)(VPUP)
-                        self.vineyard[-1] = [i]
-            if self.R[i] and self.R[i+1]: # Case 2
-                if i in self.U[i+1]: # Case 2.1
-                    self.col_row_op(i,i+1)
-                    self.switcheroo(i) # PDP = (PRWP)(PWUP)
-                    if max(self.R[i]) == max(self.R[i+1]): # Case 2.1.2
-                        self.col_row_op(i,i+1)
-                        self.vineyard[-1] = [i,max(self.R[i+1]), max(self.R[i])]
-            if self.R[i] and not self.R[i+1]: # Case 3
-                if i in self.U[i+1]: # Case 3.1
-                    self.vineyard[-1] = [i,max(self.R[i])]
-                    self.col_row_op(i,i+1)
+        self.vineyard.append([i,-1])
+        if not self.R[i] and not self.R[i+1]: # Case 1
+            if i in self.U[i+1]:
+                self.U[i+1].remove(i)
+            k = -1
+            l = -1
+            for n in range(len(self)):
+                if self.R[n] and max(self.R[n]) == i:
+                    k = n
+                if self.R[n] and max(self.R[n]) == i+1:
+                    l = n
+            if k != l and i in self.R[l]: # Case 1.1
+                if k < l: # Case 1.1.1
                     self.switcheroo(i)
-                    self.col_row_op(i,i+1) # PDP = (PRWPW)(WPWUP)
-            if not self.R[i] and self.R[i+1]: # Case 4
-                if i in self.U[i+1]:
-                    self.U[i+1].remove(i)
-
+                    self.col_row_op(k,l) # PDP = (PRPV)(VPUP)
+                if l < k: # Case 1.1.2
+                    self.switcheroo(i)
+                    self.col_row_op(l,k) # PDP = (PRPV)(VPUP)
+                    self.vineyard[-1] = [i]
+        if self.R[i] and self.R[i+1]: # Case 2
+            if i in self.U[i+1]: # Case 2.1
+                self.col_row_op(i,i+1)
+                self.switcheroo(i) # PDP = (PRWP)(PWUP)
+                if max(self.R[i]) == max(self.R[i+1]): # Case 2.1.2
+                    self.col_row_op(i,i+1)
+                    self.vineyard[-1] = [i,max(self.R[i+1]), max(self.R[i])]
+        if self.R[i] and not self.R[i+1]: # Case 3
+            if i in self.U[i+1]: # Case 3.1
+                self.vineyard[-1] = [i,max(self.R[i])]
+                self.col_row_op(i,i+1)
+                self.switcheroo(i)
+                self.col_row_op(i,i+1) # PDP = (PRWPW)(WPWUP)
+        if not self.R[i] and self.R[i+1]: # Case 4
+            if i in self.U[i+1]:
+                self.U[i+1].remove(i)
