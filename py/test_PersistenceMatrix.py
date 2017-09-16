@@ -5,7 +5,7 @@ class PersistenceMatrixTestCase(unittest.TestCase):
     matrix_class = PersistenceMatrix
 
     def test_init(self):
-        p = self.matrix_class()
+        self.matrix_class()
 
     def reduced_triangle_assertions(self, p):
         for n in {0,1,2,3,6}:

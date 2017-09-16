@@ -2,7 +2,7 @@ import unittest
 from SortedList import *
 
 class TestSortedList(unittest.TestCase):
-    
+
     def test_init(self):
         s = SortedList()
         p = SortedList([9,7,8])
