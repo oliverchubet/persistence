@@ -31,7 +31,7 @@ class SortedList(list):
 
     def max(self):
         return self[-1]
-    
+
     def min(self):
         return self[0]
 
@@ -52,4 +52,3 @@ class SortedList(list):
         while temp:
             self.append(temp.pop())
         self.extend(otemp)
-

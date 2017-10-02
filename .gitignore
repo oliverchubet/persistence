@@ -4,6 +4,7 @@
 *~
 \#*\#
 *.sw*
+.\#*
 
 # Miscellaneous
 .commit
