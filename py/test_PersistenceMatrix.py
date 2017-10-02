@@ -49,7 +49,7 @@ class PersistenceMatrixTestCase(unittest.TestCase):
 
     @classmethod
     def setup_line(cls):
-        p = cls.matrix_class()
+       p = cls.matrix_class()
         p.insert([], [], [0,1], [],
                  [3,1], [], [5,3], [],
                  [7,5], [], [9,7], [])

@@ -87,8 +87,8 @@ class PersistenceMatrix:
 
 
 class CoPersistenceMatrix(PersistenceMatrix):
-
-    def pHrow(self):
+    """ pHrow co-persistence algorithm """
+    def reduce(self):
         lows = {}
         for i in range(len(self)):
             if self.R[i]:
@@ -105,7 +105,9 @@ class CoPersistenceMatrix(PersistenceMatrix):
                     self.U[j] = self.U[j] ^ self.U[p]
                 self.dgm[p] = i
 
-    def pCoh(self):
+class pCohCoPersistence(CoPersistenceMatrix):
+    """ pCoh co-persistence algorithm """
+    def reduce(self):
         Z = []
         for i in range(len(self)):
             indices = []
@@ -122,7 +124,9 @@ class CoPersistenceMatrix(PersistenceMatrix):
                 Z.remove(p)
                 self.dgm[p] = i
 
-    def annotations(self): # doesn't use union-find
+class AnnotationMatrix(CoPersistenceMatrix):
+    """ annotations co-persistence algorithm """
+    def reduce(self): # doesn't use union-find
         av = {}     # annotation vectors
         avT = {}    # transpose of annotation vectors
         for i in range(len(self)):
@@ -146,7 +150,6 @@ class CoPersistenceMatrix(PersistenceMatrix):
 
 class SpectralPersistenceMatrix(PersistenceMatrix):
     """from Harer and Edelsbrunner"""
-
     def reduce(self):
         for r in range(len(self)):
             for j in range(r,len(self)):
@@ -161,8 +164,8 @@ class SpectralPersistenceMatrix(PersistenceMatrix):
 
 
 class FuturePersistenceMatrix(PersistenceMatrix):
-
-    def reduce(self): # From the Kerber paper
+    """ From Nested Dissection paper """
+    def reduce(self):
         for i in range(len(self)):
             if self.R[i]:
                 low = max(self.R[i])
