@@ -50,9 +50,15 @@ class PersistenceMatrixTestCase(unittest.TestCase):
     @classmethod
     def setup_line(cls):
        p = cls.matrix_class()
-        p.insert([], [], [0,1], [],
+       p.insert([], [], [0,1], [],
                  [3,1], [], [5,3], [],
                  [7,5], [], [9,7], [])
+       return p
+
+    @classmethod
+    def setup_different_triangle(self):
+        p = self.matrix_class()
+        p.insert([], [], [], [0,1], [1,2], [0,2], [3,4,5])
         return p
 
     def test_insert_col(self):
@@ -89,6 +95,31 @@ class SpectralPersistenceMatrixTestCase(PersistenceMatrixTestCase):
 
 class FuturePersistenceMatrixTestCase(PersistenceMatrixTestCase):
     matrix_class = FuturePersistenceMatrix
+
+class TestAnnotationsMatrix(PersistenceMatrixTestCase):
+
+    matrix_class = AnnotationMatrix
+
+    def reduced_triangle_assertions(self, p):
+        self.assertEqual(p.dgm[2], 4)
+        self.assertEqual(p.dgm[3], 5)
+
+    def reduced_sphere_assertions(self, p):
+        self.assertEqual(p.dgm[1], 2)
+        self.assertEqual(p.dgm[3], 4)
+
+    def test_annotations_triangle(self):
+        p = self.setup_different_triangle()
+        p.reduce()
+        self.assertEqual(p.dgm[1], 3)
+        self.assertEqual(p.dgm[2], 4)
+        self.assertEqual(p.dgm[5], 6)
+
+    def test_annotations_sphere(self):
+        p = self.setup_sphere()
+        p.reduce()
+        self.assertEqual(p.dgm[1], 2)
+        self.assertEqual(p.dgm[3], 4)
 
 if __name__ == '__main__':
     unittest.main()

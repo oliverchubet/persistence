@@ -105,7 +105,7 @@ class CoPersistenceMatrix(PersistenceMatrix):
                     self.U[j] = self.U[j] ^ self.U[p]
                 self.dgm[p] = i
 
-class pCohCoPersistence(CoPersistenceMatrix):
+class pCohCoPersistenceMatrix(CoPersistenceMatrix):
     """ pCoh co-persistence algorithm """
     def reduce(self):
         Z = []
