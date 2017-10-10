@@ -121,5 +121,38 @@ class TestAnnotationsMatrix(PersistenceMatrixTestCase):
         self.assertEqual(p.dgm[1], 2)
         self.assertEqual(p.dgm[3], 4)
 
+class ZigZagPersistenceTestCase(PersistenceMatrixTestCase):
+
+    matrix_class = ZigZagPersistenceMatrix
+
+    def test_zigzag_reduce_triangle_exact_sequence(self):
+        p = ZigZagPersistenceMatrix()
+        p.insert([],[],[],[0,1],[0,2],[1,2],[3,4,5])
+        order = [0,1,2,3,4,5,6,6,5,4,3,2,1,0]
+        arrows = [1,1,1,1,1,1,1,0,0,0,0,0,0,0]
+        p.zigzag_reduce(order, arrows)
+        self.assertEqual(p.dgm[0], [(0,0,12)])
+        self.assertEqual(p.dgm[1], [(3,1,2),(1,10,11)])
+        self.assertEqual(p.dgm[2], [(4,2,3),(2,9,10)])
+        self.assertEqual(p.dgm[5], [(6,5,5), (5,7,7)])
+
+    def test_zigzag_reduce_segment_exact_sequence(self):
+        p = ZigZagPersistenceMatrix()
+        p.insert([],[],[0,1])
+        order = [0,1,2,2,1,0]
+        arrows = [1,1,1,0,0,0]
+        p.zigzag_reduce(order, arrows)
+        self.assertEqual(p.dgm[1], [(2,1,1),(1,3,3)])
+        self.assertEqual(p.dgm[0], [(0,0,4)])
+
+    def test_zigzag_reduce_segment(self):
+        p = ZigZagPersistenceMatrix()
+        p.insert([],[],[0,1])
+        order = [0,1,2,2,2]
+        arrows = [1,1,1,0,1]
+        p.zigzag_reduce(order, arrows)
+        self.assertEqual(p.dgm[1], [(2,1,1),(2,3,3)])
+        self.assertEqual(p.dgm[0], [(0,0,4)])
+
 if __name__ == '__main__':
     unittest.main()

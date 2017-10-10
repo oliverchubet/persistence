@@ -3,7 +3,6 @@
 from SortedList import *
 from UnionFind import *
 
-
 class Matrix(list):
     def insert_col(self, col):
         self.append(SortedList(col))
@@ -34,7 +33,6 @@ class Matrix(list):
             T.insert_col(L)
         return T
 
-
 class PersistenceMatrix:
 
     def __init__(self):
@@ -64,7 +62,7 @@ class PersistenceMatrix:
                 else:
                     self.dgm[j] = i
                     break
-
+            
     def iso_reordering(self): # returns backwards and only does dfs down
         rT = self.R.transpose()
         tops, order, marks = set(), [], set()
@@ -85,7 +83,6 @@ class PersistenceMatrix:
             order = temp
         return order
 
-
 class CoPersistenceMatrix(PersistenceMatrix):
     """ pHrow co-persistence algorithm """
     def reduce(self):
@@ -105,8 +102,9 @@ class CoPersistenceMatrix(PersistenceMatrix):
                     self.U[j] = self.U[j] ^ self.U[p]
                 self.dgm[p] = i
 
-class pCohCoPersistenceMatrix(CoPersistenceMatrix):
+class pCohCoPersistenceMatrix(PersistenceMatrix):
     """ pCoh co-persistence algorithm """
+
     def reduce(self):
         Z = []
         for i in range(len(self)):
@@ -124,7 +122,8 @@ class pCohCoPersistenceMatrix(CoPersistenceMatrix):
                 Z.remove(p)
                 self.dgm[p] = i
 
-class AnnotationMatrix(CoPersistenceMatrix):
+
+class AnnotationMatrix(PersistenceMatrix):
     """ annotations co-persistence algorithm """
     def reduce(self): # doesn't use union-find
         av = {}     # annotation vectors
@@ -147,7 +146,6 @@ class AnnotationMatrix(CoPersistenceMatrix):
                     av[k] = av[k] ^ temp
                 self.dgm[low] = i
 
-
 class SpectralPersistenceMatrix(PersistenceMatrix):
     """from Harer and Edelsbrunner"""
     def reduce(self):
@@ -162,7 +160,6 @@ class SpectralPersistenceMatrix(PersistenceMatrix):
                         self.dgm[low] = j
                         break
 
-
 class FuturePersistenceMatrix(PersistenceMatrix):
     """ From Nested Dissection paper """
     def reduce(self):
@@ -175,6 +172,47 @@ class FuturePersistenceMatrix(PersistenceMatrix):
                         self.U.add_col(i,j)
                         self.R.add_col(i,j)
 
+class ZigZagPersistenceMatrix(PersistenceMatrix):
+
+    def zigzag_reduce(self, order, arrows):
+        M = {}      # current matrix 
+        Mdgm = {}   # current diagram
+        b = {}      # birth times of current cycles
+        rMdgm = {}  # reverse lookup for Mdgm
+        for t in range(len(arrows)): # 1 is forward arrow, 0 for backward
+            s = order[t]
+            if arrows[t]:
+                M[s] = self.R[s]
+                while M[s]:
+                    j = max(M[s])
+                    if j in Mdgm:
+                        M[s] = M[s] ^ M[Mdgm[j]]
+                    else:
+                        if j in self.dgm:
+                            self.dgm[j].append((s, b.pop(j), t-1))
+                        else:
+                            self.dgm[j] = [(s, b.pop(j), t-1)]
+                        Mdgm[j] = s
+                        rMdgm[s] = j
+                        break
+                if not M[s]:
+                    b[s] = t
+            else:
+                M.pop(s)
+                if s in rMdgm:
+                    tmp = rMdgm.pop(s)
+                    b[tmp] = t
+                    Mdgm.pop(tmp)
+                else:
+                    if s in self.dgm:
+                        self.dgm[s].append((s, b.pop(s), t-1))
+                    else:
+                        self.dgm[s] = [(s, b.pop(s), t-1)]
+        for s in b:
+            if s in self.dgm:
+                self.dgm[s].append((s,b[s],t))
+            else:
+                self.dgm[s] = [(s,b[s],t)]
 
 class Vineyard(PersistenceMatrix):
     def __init__(self):
