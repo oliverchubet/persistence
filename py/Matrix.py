@@ -122,7 +122,6 @@ class pCohCoPersistenceMatrix(PersistenceMatrix):
                 Z.remove(p)
                 self.dgm[p] = i
 
-
 class AnnotationMatrix(PersistenceMatrix):
     """ annotations co-persistence algorithm """
     def reduce(self): # doesn't use union-find
@@ -188,10 +187,7 @@ class ZigZagPersistenceMatrix(PersistenceMatrix):
                     if j in Mdgm:
                         M[s] = M[s] ^ M[Mdgm[j]]
                     else:
-                        if j in self.dgm:
-                            self.dgm[j].append((s, b.pop(j), t-1))
-                        else:
-                            self.dgm[j] = [(s, b.pop(j), t-1)]
+                        self.dgm[b.pop(j)] = t-1
                         Mdgm[j] = s
                         rMdgm[s] = j
                         break
@@ -204,15 +200,9 @@ class ZigZagPersistenceMatrix(PersistenceMatrix):
                     b[tmp] = t
                     Mdgm.pop(tmp)
                 else:
-                    if s in self.dgm:
-                        self.dgm[s].append((s, b.pop(s), t-1))
-                    else:
-                        self.dgm[s] = [(s, b.pop(s), t-1)]
+                    self.dgm[b.pop(s)] = t-1
         for s in b:
-            if s in self.dgm:
-                self.dgm[s].append((s,b[s],t))
-            else:
-                self.dgm[s] = [(s,b[s],t)]
+            self.dgm[b[s]] = t
 
 class Vineyard(PersistenceMatrix):
     def __init__(self):

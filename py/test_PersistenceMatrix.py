@@ -1,5 +1,7 @@
 import unittest
 from Matrix import *
+import dionysus as d
+import math
 
 class PersistenceMatrixTestCase(unittest.TestCase):
     matrix_class = PersistenceMatrix
@@ -131,10 +133,13 @@ class ZigZagPersistenceTestCase(PersistenceMatrixTestCase):
         order = [0,1,2,3,4,5,6,6,5,4,3,2,1,0]
         arrows = [1,1,1,1,1,1,1,0,0,0,0,0,0,0]
         p.zigzag_reduce(order, arrows)
-        self.assertEqual(p.dgm[0], [(0,0,12)])
-        self.assertEqual(p.dgm[1], [(3,1,2),(1,10,11)])
-        self.assertEqual(p.dgm[2], [(4,2,3),(2,9,10)])
-        self.assertEqual(p.dgm[5], [(6,5,5), (5,7,7)])
+        self.assertEqual(p.dgm[0], 12)
+        self.assertEqual(p.dgm[1], 2)
+        self.assertEqual(p.dgm[10], 11)
+        self.assertEqual(p.dgm[2], 3)
+        self.assertEqual(p.dgm[9], 10)
+        self.assertEqual(p.dgm[5], 5)
+        self.assertEqual(p.dgm[7], 7)
 
     def test_zigzag_reduce_segment_exact_sequence(self):
         p = ZigZagPersistenceMatrix()
@@ -142,8 +147,9 @@ class ZigZagPersistenceTestCase(PersistenceMatrixTestCase):
         order = [0,1,2,2,1,0]
         arrows = [1,1,1,0,0,0]
         p.zigzag_reduce(order, arrows)
-        self.assertEqual(p.dgm[1], [(2,1,1),(1,3,3)])
-        self.assertEqual(p.dgm[0], [(0,0,4)])
+        self.assertEqual(p.dgm[1], 1)
+        self.assertEqual(p.dgm[3], 3)
+        self.assertEqual(p.dgm[0], 4)
 
     def test_zigzag_reduce_segment(self):
         p = ZigZagPersistenceMatrix()
@@ -151,8 +157,95 @@ class ZigZagPersistenceTestCase(PersistenceMatrixTestCase):
         order = [0,1,2,2,2]
         arrows = [1,1,1,0,1]
         p.zigzag_reduce(order, arrows)
-        self.assertEqual(p.dgm[1], [(2,1,1),(2,3,3)])
-        self.assertEqual(p.dgm[0], [(0,0,4)])
+        self.assertEqual(p.dgm[1], 1)
+        self.assertEqual(p.dgm[3], 3)
+        self.assertEqual(p.dgm[0], 4)
+
+    def test_compare_to_dionysus(self):
+        p = ZigZagPersistenceMatrix()
+        p.insert([],[],[],[0,1],[0,2],[1,2],[3,4,5],[])
+        order = [0,1,2,3,4,5,6,6,5,4,3,2,1,0,7]
+        arrows = [1,1,1,1,1,1,1,0,0,0,0,0,0,0,1]
+        p.zigzag_reduce(order, arrows)
+        f = d.Filtration([[0],[1],[2],[0,1],[0,2],[1,2],[0,1,2],[3]])
+        times = [[0,13],[1,12],[2,11],[3,10],[4,9],[5,8],[6,7],[14]]
+        zz, dgms = d.zigzag_homology_persistence(f, times)
+        for i in dgms[0]:
+            if i.death == math.inf:
+                self.assertEqual(len(arrows), p.dgm[i.birth]+1)
+            else:
+                self.assertEqual(i.death, p.dgm[i.birth]+1)
+
+    @staticmethod
+    def get_vertices(p, col):
+        if not p.R[col]:
+            return [col]
+        to_check = set(p.R[col])
+        vertices = []
+        while to_check:
+            s = to_check.pop()
+            if p.R[s]:
+                to_check.update(set(p.R[s]))
+            else:
+                vertices.append(s)
+        return vertices
+
+    def test_get_vertices(self):
+        p = ZigZagPersistenceMatrix()
+        p.insert([],[],[],[0,1],[0,2],[1,2],[3,4,5],[])
+        vertices = self.get_vertices(p, 6)
+        self.assertEqual(vertices, [0,1,2])
+        vertices = self.get_vertices(p,0)
+        self.assertEqual(vertices, [0])
+        vertices = self.get_vertices(p,3)
+        self.assertEqual(vertices, [0,1])
+        
+    def convert_to_dionysus(self, p, order):
+        f = []
+        times = []
+        for i in range(len(p.R)):
+            f.append(self.get_vertices(p,i))
+            times.append([])
+        for i,s in enumerate(order):
+            times[s].append(i)
+        zz, dgms = d.zigzag_homology_persistence(d.Filtration(f), times)
+        return dgms
+
+    def test_convert_to_dionysus(self):
+        p = ZigZagPersistenceMatrix()
+        p.insert([],[],[],[0,1],[0,2],[1,2],[3,4,5],[])
+        order = [0,1,2,3,4,5,6,6,5,4,3,2,1,0,7]
+        arrows = [1,1,1,1,1,1,1,0,0,0,0,0,0,0,1]
+        p.zigzag_reduce(order, arrows)
+        dgms = self.convert_to_dionysus(p,order)
+        for i in dgms[0]:
+            if i.death == math.inf:
+                self.assertEqual(len(arrows), p.dgm[i.birth]+1)
+            else:
+                self.assertEqual(i.death, p.dgm[i.birth]+1)
+
+    def arbitrary_zigzag_assertions(self, p, order, arrows):
+        p.zigzag_reduce(order, arrows)
+        dgms = self.convert_to_dionysus(p,order)
+        for j in dgms:
+            for i in j:
+                if i.death == math.inf:
+                    self.assertEqual(len(arrows), p.dgm[i.birth]+1)
+                else:
+                    self.assertEqual(i.death, p.dgm[i.birth]+1)
+
+    def test_zigzags(self):
+        p = ZigZagPersistenceMatrix()
+        p.insert([],[],[],[],[0,1],[0,2],[0,3],[1,2],[1,3],[2,3])
+        order =  [0,1,2,2,1,1,2,3,4,3,5,3,6,7,6,8,9,8]
+        arrows = [1,1,1,0,0,1,1,1,1,0,1,1,1,1,0,1,1,0]
+        self.arbitrary_zigzag_assertions(p,order,arrows)
+        order = [0,0,1,1,0,1,2,2,1,1,2,3,4,5,6]
+        arrows= [1,0,1,0,1,1,1,0,0,1,1,1,1,1,1]
+        self.arbitrary_zigzag_assertions(p,order,arrows)
+        order = [0,1,2,4,5,7,5]
+        arrows = [1,1,1,1,1,1,0]
+        self.arbitrary_zigzag_assertions(p,order,arrows)
 
 if __name__ == '__main__':
     unittest.main()
