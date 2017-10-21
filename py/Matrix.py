@@ -171,39 +171,6 @@ class FuturePersistenceMatrix(PersistenceMatrix):
                         self.U.add_col(i,j)
                         self.R.add_col(i,j)
 
-class ZigZagPersistenceMatrix(PersistenceMatrix):
-
-    def zigzag_reduce(self, order, arrows):
-        M = {}      # current matrix 
-        Mdgm = {}   # current diagram
-        b = {}      # birth times of current cycles
-        rMdgm = {}  # reverse lookup for Mdgm
-        for t in range(len(arrows)): # 1 is forward arrow, 0 for backward
-            s = order[t]
-            if arrows[t]:
-                M[s] = self.R[s]
-                while M[s]:
-                    j = max(M[s])
-                    if j in Mdgm:
-                        M[s] = M[s] ^ M[Mdgm[j]]
-                    else:
-                        self.dgm[b.pop(j)] = t-1
-                        Mdgm[j] = s
-                        rMdgm[s] = j
-                        break
-                if not M[s]:
-                    b[s] = t
-            else:
-                M.pop(s)
-                if s in rMdgm:
-                    tmp = rMdgm.pop(s)
-                    b[tmp] = t
-                    Mdgm.pop(tmp)
-                else:
-                    self.dgm[b.pop(s)] = t-1
-        for s in b:
-            self.dgm[b[s]] = t
-
 class Vineyard(PersistenceMatrix):
     def __init__(self):
         super().__init__()
@@ -255,3 +222,66 @@ class Vineyard(PersistenceMatrix):
         if not self.R[i] and self.R[i+1]: # Case 4
             if i in self.U[i+1]:
                 self.U[i+1].remove(i)
+
+class ZigZagPersistenceMatrix(PersistenceMatrix):
+
+    def __init__(self):
+        super().__init__()
+        self.coR = []       # coboundary matrix
+
+    def insert_col(self, col):
+        super().insert_col(col)
+        self.coR.append([])
+        s = len(self.R)
+        for i in col:
+            self.coR[i].append(s)
+
+    def zigzag_reduce(self, order, arrows):
+        M = {}      # current matrix 
+        Mdgm = {}   # current diagram
+        b = {}      # birth times of current cycles
+        rMdgm = {}  # reverse lookup for Mdgm
+        for t in range(len(arrows)): # 1 is forward arrow, 0 for backward
+            s = order[t]
+            if arrows[t]:
+                M[s] = self.R[s]
+                while M[s]:
+                    j = max(M[s])
+                    if j in Mdgm:
+                        M[s] = M[s] ^ M[Mdgm[j]]
+                        self.U[Mdgm[j]].append(s)
+                    else:
+                        self.dgm[b[j]] = t-1
+                        Mdgm[j] = s
+                        rMdgm[s] = j
+                        break
+                if not M[s]:
+                    b[s] = t
+            else:
+                if s in rMdgm:
+                    p = rMdgm.pop(s)
+                    Mdgm.pop(p)
+                    b[p] = t
+                    for k in self.U[s]:
+                        if k in M and k != s:
+                            M[k] = M[k] ^ M[s]
+                            while M[k]:
+                                j = max(M[k])
+                                if j in Mdgm:
+                                    M[k] = M[k] ^ M[Mdgm[j]]
+                                    self.U[Mdgm[j]].append(k)
+                                else:
+                                    self.dgm[b[k]] = t-1
+                                    Mdgm[j] = k
+                                    rMdgm[k] = j
+                                    break
+                            if not M[k]:
+                                b[k] = t
+                        self.U[s] = [s]
+                else:
+                    self.dgm[b[s]] = t-1
+                M.pop(s)
+        for s in b:
+            if not b[s] in self.dgm and not s in Mdgm:
+                self.dgm[b[s]] = t
+
