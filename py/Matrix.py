@@ -2,6 +2,8 @@
 
 from SortedList import *
 from UnionFind import *
+#from PIL import Image, ImageDraw, ImageColor
+import random as r
 
 class Matrix(list):
     def insert_col(self, col):
@@ -62,7 +64,74 @@ class PersistenceMatrix:
                 else:
                     self.dgm[j] = i
                     break
-            
+
+    def get_vertices(self, col):
+        if not self.R[col]:
+            return [col]
+        to_check = set(self.R[col])
+        vertices = []
+        while to_check:
+            s = to_check.pop()
+            if self.R[s]:
+                to_check.update(set(self.R[s]))
+            else:
+                vertices.append(s)
+        return vertices
+
+    def to_svg(self):
+        xsize = 500
+        ysize = 200 
+        point_radius = 4
+        stroke_width = 2
+        poly_opacity = .25
+        line_opacity = .75
+        f = open("test.svg", "w")
+        f.write(''.join(["<svg width=\"", str(xsize),
+            "\" height=\"", str(ysize), "\">\n"]))
+        pts = {}
+        for i in range(len(self)):
+            if len(self.R[i]) == 0:
+                pts[i] = (r.randint(0,xsize),
+                        r.randint(0, ysize))
+        for i in reversed(range(len(self))):
+            if len(self.R[i]) == 0:
+                p = pts[i]
+                f.write(''.join(["\t<circle cx=\"", str(p[0]),
+                    "\" cy=\"", str(p[1]),
+                    "\" r=\"", str(point_radius),
+                    "\" stroke=\"green\"
+                    stroke-width=\"", str(stroke_width),
+                    "\" fill=\"yellow\" />\n"]))
+            elif len(self.R[i]) == 2:
+                p0 = pts[self.R[i][0]]
+                p1 = pts[self.R[i][1]]
+                f.write(''.join(["\t<line x1=\"", str(p0[0]),
+                    "\" y1=\"",  str(p0[1]),
+                    "\" x2=\"", str(p1[0]),
+                    "\" y2=\"", str(p1[1]),
+                    "\" style=\"stroke:rgb(0,0,255);",
+                    "stroke-width:", str(stroke_width),
+                    ";opacity:", str(line_opacity),
+                    "\" />\n"]))
+            else:
+                v = self.get_vertices(i)
+                polypts = []
+                string = "\t<polygon points=\""
+                for p in v:
+                    polypts.append(pts[p])
+                    string = ''.join([string,
+                        str(pts[p][0]), ",",
+                        str(pts[p][1]), " "])
+                string = ''.join([string,
+                    "\" style=\"fill:mediumpurple;",
+                    "stroke:purple;",
+                    "stroke-width:0;",
+                    "opacity:", str(poly_opacity),
+                    "\" />\n"])
+                f.write(string)
+        f.write('</svg>')
+        f.close()
+
     def iso_reordering(self): # returns backwards and only does dfs down
         rT = self.R.transpose()
         tops, order, marks = set(), [], set()
