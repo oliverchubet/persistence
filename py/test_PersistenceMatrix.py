@@ -92,6 +92,13 @@ class PersistenceMatrixTestCase(unittest.TestCase):
         p.iso_reordering()
         raise NotImplementedError()  # need to test something
 
+    @unittest.skip("skipping for quiet testing")
+    def test_print_dgm(self):
+        p = PersistenceMatrix()
+        p.insert([],[],[0,1],[],[],[3,4],[],[],[6,7],[0,3],[1,3],[4,6],[4,7])
+        p.reduce()
+        p.print_dgm()
+
 class SpectralPersistenceMatrixTestCase(PersistenceMatrixTestCase):
     matrix_class = SpectralPersistenceMatrix
 

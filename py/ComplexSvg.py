@@ -17,6 +17,13 @@ def sc_to_svg(sc, filename, pts, xsize, ysize):
                 "\" stroke=\"green\" ",
                 "stroke-width=\"", str(stroke_width),
                 "\" fill=\"yellow\" />\n"]))
+            f.write(''.join(["\t<text x=\"", str(p[0]),
+                "\" y=\"", str(p[1]-10),
+                "\" font-family=\"sans-serif\" ",
+                "font-size=\"20px\" ",
+                "text-anchor=\"middle\" ",
+                "fill=\"red\">",
+                str(i), "</text>"]))
         elif len(sc.R[i]) == 2:
             p0 = pts[sc.R[i][0]]
             p1 = pts[sc.R[i][1]]

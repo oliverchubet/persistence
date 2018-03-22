@@ -67,5 +67,17 @@ class TestMatrix(unittest.TestCase):
         self.assertEqual(m[0], [0,1,3])
         self.assertEqual(m[1], [2,3,4])
 
+    @unittest.skip("skipping for quiet testing")
+    def test_print_matrix(self):
+        m = Matrix()
+        m.insert_col([])
+        m.insert_col([])
+        m.print_matrix()
+        m = Matrix()
+        m.insert_col([])
+        m.insert_col([])
+        m.insert_col([0,1])
+        m.print_matrix()
+
 if __name__ == '__main__':
     unittest.main()

@@ -33,6 +33,18 @@ class Matrix(list):
                     L.add(j)
             T.insert_col(L)
         return T
+    
+    def print_transpose(self):
+        for c in self:
+            last = -1
+            for v in c:
+                print("0 "*(v-last-1), end='')
+                print("1 ", end='')
+                last = v
+            print("0 "*(len(self)-(last+1)))
+
+    def print_matrix(self):
+        self.transpose().print_transpose()
 
 class PersistenceMatrix:
 
@@ -87,6 +99,10 @@ class PersistenceMatrix:
                 vertices.append(s)
         return vertices
 
+    def print_dgm(self):
+        for p in self.dgm:
+            print(" "*p + "|" + "-"*(self.dgm[p]-p-1) + ")")
+
     def iso_reordering(self): # returns backwards and only does dfs down
         rT = self.R.transpose()
         tops, order, marks = set(), [], set()
@@ -109,6 +125,7 @@ class PersistenceMatrix:
 
 class CoPersistenceMatrix(PersistenceMatrix):
     """ pHrow co-persistence algorithm """
+
     def reduce(self):
         lows = {}
         for i in range(len(self)):
