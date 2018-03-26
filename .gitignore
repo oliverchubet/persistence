@@ -135,3 +135,7 @@ ENV/
 *.dSYM/
 *.su
 vgcore.*
+
+# Place to put misc. ignorables
+ignore_me
+.gitignore

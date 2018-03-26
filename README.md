@@ -10,7 +10,7 @@ The ***boundary*** of a simplex, $\partial\sigma = \\{\tau : \tau \subset \sigma
 
 Then a ***simplicial complex*** will be a set of simplices $K$, such that for any $\sigma \in K$, if $\tau \subset \sigma,$ then $\tau \in K$.
 
-Let $\\{\sigma\_i\\}$ be a set of simplices such that $\bigcup\_{i=1} \\{\sigma\_i\\} = K$. The set $\\{\sigma\_i\\}$ is in ***filtration order*** if for any $\tau \subset \sigma\_i$ there exists $j < i$ such that $\tau = \sigma\_j$.
+Let $\\{\sigma\_i\\}$ be a set of simplices such that $\bigcup \\{\sigma\_i\\} = K$. The set $\\{\sigma\_i\\}$ is in ***filtration order*** if for any $\tau \subset \sigma\_i$ there exists $j < i$ such that $\tau = \sigma\_j$.
 
 A ***filtration*** of a simplicial complex, $K$, is a sequence of simplicial complexes, $\\{K\_i\\}$, where $$K\_0 \subset K\_1 \subset \dots \subset K\_{n-1} \subset K\_n = K.$$
 
@@ -58,7 +58,7 @@ If adding $\sigma\_i$ to the simplicial complex $K\_{i-1}$ creates a new homolog
 
 A ***persistence diagram*** is a set of pairs of births and deaths such that a death is paired with the index that was the birth of the homological feature (equivalence class) that is disappearing at that death index.
 
-### Some Persistence Algorithms
+### Original Algorithm
 
 Let `N` be the number of columns in boundary matrix `D` for the algorithms below.
 
@@ -68,7 +68,6 @@ The function, `low(i)`, returns the index of the lowest 1 of a column `i`. (ie. 
 `dgm` will be a dictionary of birth-death pairs, with the key being the birth and value being the death.
 -->
 
-### Original Algorithm
 
 ```python
 	Given: D

@@ -2,19 +2,10 @@
 
 #### To use the persistence algorithm:
 
-Say you want a persistence diagram for the following complex:
-
-<svg width="250" height="70">
-        <line x1="25" y1="25" x2="75" y2="25" style="stroke:rgb(0,0,255);stroke-width:2;opacity:0.75" />
-        <line x1="125" y1="50" x2="75" y2="25" style="stroke:rgb(0,0,255);stroke-width:2;opacity:0.75" />
-        <line x1="25" y1="25" x2="125" y2="50" style="stroke:rgb(0,0,255);stroke-width:2;opacity:0.75" />
-        <circle cx="75" cy="25" r="4" stroke="green" stroke-width="2" fill="yellow" />
-        <text x="75" y="17" font-family="sans-serif" font-size="20px" text-anchor="middle" fill="red">2</text>     <circle cx="125" cy="50" r="4" stroke="green" stroke-width="2" fill="yellow" />
-        <text x="125" y="37" font-family="sans-serif" font-size="20px" text-anchor="middle" fill="red">1</text>    <circle cx="25" cy="25" r="4" stroke="green" stroke-width="2" fill="yellow" />
-        <text x="25" y="16" font-family="sans-serif" font-size="20px" text-anchor="middle" fill="red">0</text></svg>
+Say you want a persistence diagram for a complex:
 
 * Make a ```PersistenceMatrix```
-* Insert simplices as a list of their boundary simplices
+* Insert a list of simplices as a list of their boundary simplices
 * Reduce the ```PersistenceMatrix```
 
 ``` python
@@ -32,6 +23,7 @@ Say you want a persistence diagram for the following complex:
   |-)
 ```
 * The reduced matrix is stored in ```M.R```, and reducing matrix in ```M.U```
+* For a visual you can print the matrix with ```print_matrix()```
 ```python
 >>> M.R
 [[], [], [], [0, 1], [0, 2], []]
@@ -66,3 +58,65 @@ Say you want a persistence diagram for the following complex:
 
 * The diagram will be the same using cohomology or homology
 * ```CoPersistenceMatrix``` is a subclass of ```PersistenceMatrix``` so all of the previous methods are still available
+
+#### Other Persistence Algorithms Implemented:
+
+* To use a different algorithm, just use the subclass that implements the desired version
+* Make note of whether the input is a boundary or coboundary matrix
+
+| Persistence Algorithm | Class Name                | Ref |
+| :-------------------: | :-----------------------: | :-: |
+| Original              | PersistenceMatrix         | [1] |
+| pHrow (cohomology)    | CoPersistenceMatrix       | [2] |
+| pCoh (cohomology)     | pCohCoPersistenceMatrix   | [2] |
+| Annotations           | AnnotationMatrix          | [3] |
+| Spectral sequence     | SpectralPersistenceMatrix | [1] | 
+| Row reduction         | FuturePersistenceMatrix   | [4] |
+
+#### To Use The Vineyard Algorithm:
+
+If you already have a persistence diagram, but want to swap two columns, you can update the diagram using the vineyard algorithm.
+
+* Make a ```Vineyard```
+* Insert a boundary matrix for you complex
+* Reduce the ```Vineyard```
+* Call ```vineyard_list``` with a list of indices to swap. For each index ```i``` in the list, columns ```i``` and ```i+1``` will be swapped and the diagram will be updated.
+
+```python
+>>> V = Vineyard()
+>>> V.insert([],[],[],[0,1],[0,2],[1,2])
+>>> V.reduce()
+>>> V.dgm
+{5: 'inf', 2: 4, 1: 3, 0: 'inf'}
+>>> V.print_dgm()
+
+[5, inf)        :     [)
+[2, 4)          :  [-)
+[1, 3)          : [-)
+[0, inf)        :[-----)
+>>> V.vineyard_list(0,1,2,4)
+>>> V.dgm
+{5: 'inf', 1: 4, 3: 2, 0: 'inf'}
+>>> V.print_dgm()
+
+[5, inf)        :     [)
+[1, 4)          : [--)
+[3, 2)          :   [)
+[0, inf)        :[-----)
+```
+
+#### To run the unittests:
+
+* Run ```python -m unittest```
+
+#### References:
+
+[1] Edelsbrunner, H., & Harer, J. (2010). Computational topology: an introduction. American Mathematical Soc.
+
+[2] De Silva, V., Morozov, D., & Vejdemo-Johansson, M. (2011). Dualities in persistent (co) homology. Inverse Problems, 27(12), 124003.
+
+[3] Boissonnat, J. D., Dey, T. K., & Maria, C. (2015). The compressed annotation matrix: An efficient data structure for computing persistent cohomology. Algorithmica, 73(3), 607-619.
+
+[4] Kerber, M., Sheehy, D. R., & Skraba, P. (2016, January). Persistent homology and nested dissection. In Proceedings of the twenty-seventh annual ACM-SIAM symposium on Discrete algorithms (pp. 1234-1245). Society for Industrial and Applied Mathematics.
+
+[5] Cohen-Steiner, D., Edelsbrunner, H., & Morozov, D. (2006, June). Vines and vineyards by updating persistence in linear time. In Proceedings of the twenty-second annual symposium on Computational geometry (pp. 119-126). ACM.
