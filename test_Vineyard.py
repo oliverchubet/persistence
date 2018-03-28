@@ -1,9 +1,9 @@
 import unittest
 from Matrix import *
 
-class TestVineyard(unittest.TestCase):
+class TestPersistenceMatrix(unittest.TestCase):
     def test_switcheroo(self):
-       p = Vineyard()
+       p = PersistenceMatrix()
        p.insert_col([])
        p.insert_col([])
        p.insert_col([])
@@ -13,7 +13,7 @@ class TestVineyard(unittest.TestCase):
        self.assertEqual(p.R[3], [1,2])
        self.assertEqual(p.R[4], [0,1])
 
-       q = Vineyard()
+       q = PersistenceMatrix()
        q.insert_col([])
        q.insert_col([])
        q.insert_col([])
@@ -24,7 +24,7 @@ class TestVineyard(unittest.TestCase):
        q.switcheroo(4)
 
     def test_col_row_op(self):
-       p = Vineyard()
+       p = PersistenceMatrix()
        p.insert_col([])
        p.insert_col([])
        p.insert_col([])
@@ -37,22 +37,22 @@ class TestVineyard(unittest.TestCase):
        self.assertEqual(p.U[3], [3])
 
     def test_vineyard_algo(self): 
-        v = Vineyard()
+        v = PersistenceMatrix()
         v.insert([],[],[],[0,1],[0,2],[1,2],[3,4,5])
         v.reduce()
         v.vineyard_algo(4)
-        w = Vineyard()
+        w = PersistenceMatrix()
         w.insert([],[],[],[0,1],[1,2],[0,2],[3,4,5])
         w.reduce()
         w.update_dgm()
         self.assertEqual(w.dgm, v.dgm)
         v.vineyard_algo(2)
-        w = Vineyard()
+        w = PersistenceMatrix()
         w.insert([],[],[0,1],[],[1,3],[0,3],[2,4,5])
         w.reduce()
         w.update_dgm()
         self.assertEqual(w.dgm, v.dgm)
-        y = Vineyard()
+        y = PersistenceMatrix()
         y.insert([],[],[0,1],[],[1,3],[0,3],[2,4,5])
         y.reduce()
         for i in [0,2,4]: # all other swaps would break the filtration
@@ -60,7 +60,7 @@ class TestVineyard(unittest.TestCase):
             y.vineyard_algo(i)
             y.vineyard_algo(i)
             self.assertEqual(w.dgm, y.dgm)
-        w = Vineyard()
+        w = PersistenceMatrix()
         w.insert([],[],[0,1],[],[0,3],[1,3],[2,4,5])
         w.reduce()
         w.update_dgm()
@@ -68,11 +68,11 @@ class TestVineyard(unittest.TestCase):
         self.assertEqual(w.dgm, v.dgm)
 
     def test_vineyard_algo_2(self):
-        w = Vineyard()
+        w = PersistenceMatrix()
         w.insert([],[],[],[0,1],[1,2],[0,2],[3,4,5])
         w.reduce()
         w.update_dgm()
-        y = Vineyard()
+        y = PersistenceMatrix()
         y.insert([],[],[],[0,1],[1,2],[0,2],[3,4,5])
         y.reduce()
         for i in range(5): 
@@ -81,11 +81,11 @@ class TestVineyard(unittest.TestCase):
             self.assertEqual(w.dgm, y.dgm)
 
     def test_vineyard_algo_3(self):
-        w = Vineyard()
+        w = PersistenceMatrix()
         w.insert([],[],[],[0,2],[1,2],[0,1],[3,4,5])
         w.reduce()
         w.update_dgm()
-        y = Vineyard()
+        y = PersistenceMatrix()
         y.insert([],[],[],[0,2],[1,2],[0,1],[3,4,5])
         y.reduce()
         for i in range(5): 
@@ -95,7 +95,7 @@ class TestVineyard(unittest.TestCase):
 
 
     def test_vineyard_list(self):
-        w = Vineyard()
+        w = PersistenceMatrix()
         w.insert([],[],[],[0,2],[1,2],[0,1],[3,4,5])
         w.reduce()
         w.vineyard_list(0,0,0,1,1,1)

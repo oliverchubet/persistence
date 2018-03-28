@@ -127,8 +127,60 @@ class PersistenceMatrix:
             order = temp
         return order
 
+    def switcheroo(self,i): # the old vineyard switcheroo
+        self.R.swap_col(i,i+1)
+        self.R.swap_row(i,i+1)
+        self.U.swap_col(i,i+1)
+        self.U.swap_row(i,i+1)
+
+    def col_row_op(self, m, n):
+        self.R.add_col(m,n)
+        self.U.add_row(n,m)
+
+    def vineyard_algo(self,i):
+        if not self.R[i] and not self.R[i+1]: # Case 1
+            if i in self.U[i+1]:
+                self.U[i+1].remove(i)
+            k = -1
+            l = -1
+            for n in range(len(self)):
+                if self.R[n] and max(self.R[n]) == i:
+                    k = n
+                if self.R[n] and max(self.R[n]) == i+1:
+                    l = n
+            self.switcheroo(i)
+            if k != l and k!=-1 and l!=-1 and i in self.R[l]: # Case 1.1
+                if k < l: # Case 1.1.1
+                    self.col_row_op(k,l) # PDP = (PRPV)(VPUP)
+                else: # Case 1.1.2
+                    self.col_row_op(l,k) # PDP = (PRPV)(VPUP)
+        elif self.R[i] and self.R[i+1]: # Case 2
+            if i in self.U[i+1]: # Case 2.1
+                self.col_row_op(i,i+1)
+                self.switcheroo(i) # PDP = (PRWP)(PWUP)
+                if max(self.R[i]) == max(self.R[i+1]): # Case 2.1.2
+                    self.col_row_op(i,i+1)
+            else:
+                self.switcheroo(i)
+        elif self.R[i] and not self.R[i+1]: # Case 3
+            if i in self.U[i+1]: # Case 3.1
+                self.col_row_op(i,i+1)
+                self.switcheroo(i)
+                self.col_row_op(i,i+1) # PDP = (PRWPW)(WPWUP)
+            else:
+                self.switcheroo(i)
+        elif not self.R[i] and self.R[i+1]: # Case 4
+            self.switcheroo(i)
+            if i in self.U[i+1]:
+                self.U[i+1].remove(i)
+        self.update_dgm()
+
+    def vineyard_list(self, *swaps):
+        for i in swaps:
+            self.vineyard_algo(i)
+
 class CoPersistenceMatrix(PersistenceMatrix):
-    """ pHrow co-persistence algorithm """
+    """ pHrow persistence algorithm """
 
     def reduce(self):
         lows = {}
@@ -146,6 +198,11 @@ class CoPersistenceMatrix(PersistenceMatrix):
                     self.R[j] = self.R[j] ^ self.R[p]
                     self.U[j] = self.U[j] ^ self.U[p]
                 self.dgm[p] = i
+
+    def vineyard_algo(self, i):
+        self.R = self.R.transpose()
+        super().vineyard_algo(len(self)-i)
+        self.R = self.R.transpose()
 
 class pCohCoPersistenceMatrix(PersistenceMatrix):
     """ pCoh co-persistence algorithm """
@@ -215,66 +272,6 @@ class FuturePersistenceMatrix(PersistenceMatrix):
                     if low in self.R[j]:
                         self.U.add_col(i,j)
                         self.R.add_col(i,j)
-
-class Vineyard(PersistenceMatrix):
-    def __init__(self):
-        super().__init__()
-        self.vineyard = []
-
-    def switcheroo(self,i): # the old vineyard switcheroo
-        self.R.swap_col(i,i+1)
-        self.R.swap_row(i,i+1)
-        self.U.swap_col(i,i+1)
-        self.U.swap_row(i,i+1)
-
-    def col_row_op(self, m, n):
-        self.R.add_col(m,n)
-        self.U.add_row(n,m)
-
-    def vineyard_algo(self,i):
-        if not self.R[i] and not self.R[i+1]: # Case 1
-            if i in self.U[i+1]:
-                self.U[i+1].remove(i)
-            k = -1
-            l = -1
-            for n in range(len(self)):
-                if self.R[n] and max(self.R[n]) == i:
-                    k = n
-                if self.R[n] and max(self.R[n]) == i+1:
-                    l = n
-            if k != l and k!=-1 and l!=-1 and i in self.R[l]: # Case 1.1
-                if k < l: # Case 1.1.1
-                    self.switcheroo(i)
-                    self.col_row_op(k,l) # PDP = (PRPV)(VPUP)
-                else: # Case 1.1.2
-                    self.switcheroo(i)
-                    self.col_row_op(l,k) # PDP = (PRPV)(VPUP)
-            else:
-                self.switcheroo(i)
-        elif self.R[i] and self.R[i+1]: # Case 2
-            if i in self.U[i+1]: # Case 2.1
-                self.col_row_op(i,i+1)
-                self.switcheroo(i) # PDP = (PRWP)(PWUP)
-                if max(self.R[i]) == max(self.R[i+1]): # Case 2.1.2
-                    self.col_row_op(i,i+1)
-            else:
-                self.switcheroo(i)
-        elif self.R[i] and not self.R[i+1]: # Case 3
-            if i in self.U[i+1]: # Case 3.1
-                self.col_row_op(i,i+1)
-                self.switcheroo(i)
-                self.col_row_op(i,i+1) # PDP = (PRWPW)(WPWUP)
-            else:
-                self.switcheroo(i)
-        elif not self.R[i] and self.R[i+1]: # Case 4
-            self.switcheroo(i)
-            if i in self.U[i+1]:
-                self.U[i+1].remove(i)
-        self.update_dgm()
-
-    def vineyard_list(self, *swaps):
-        for i in swaps:
-            self.vineyard_algo(i)
 
 class ZigZagPersistenceMatrix(PersistenceMatrix):
 
